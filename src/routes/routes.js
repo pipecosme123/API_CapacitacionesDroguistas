@@ -1,19 +1,9 @@
 const express = require('express');
-const { get_login, post_visto_video, get_user_productos, post_registrase, get_producto, get_data_signup } = require('../controller/query');
-const { capacitacion_producto } = require('../middelwares/capacitacion_producto');
-const { getDataAuth } = require('../middelwares/getDataAuth');
-const { validateDataUsers, organice_data } = require('../middelwares/loginUsers');
-const { verificarToken } = require('../middelwares/token');
-const { userViewVideos } = require('../middelwares/userViewVideos');
+const { get_data } = require('../controller/query');
+const { excel } = require('../middelwares/excel');
 
 const app = express();
 
-app.get('/login', getDataAuth, get_login, validateDataUsers);
-app.get('/signup', get_data_signup, organice_data);
-app.get('/productos', verificarToken, get_user_productos, userViewVideos);
-app.get('/producto', verificarToken, get_producto, capacitacion_producto);
-
-app.post('/signup', post_registrase);
-app.post('/viewVideo', verificarToken, post_visto_video);
+app.get('/downloadExcel', get_data, excel);
 
 module.exports = app;
