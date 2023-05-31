@@ -4,14 +4,68 @@ exports.get_login = async (req, res, next) => {
 
    const { correo } = req.body;
 
-   const querySQL = 'SELECT id_usuarios AS id, correo_usuarios AS correo FROM usuarios WHERE correo_usuarios=? LIMIT 1;';
+   const querySQL = 'SELECT id_usuarios AS id, distribuidor, punto_venta, occ, correo, celular, codigo FROM users WHERE correo= ? LIMIT 1;';
 
-   query(querySQL, correo).then((data) => {
-      req.body = { data };
-      next();
-   }).catch((err) => {
-      next(err);
-   });
+   query(querySQL, correo)
+      .then((data) => {
+         req.body = { data };
+         next();
+      }).catch((err) => {
+         next(err);
+      });
+}
+
+exports.get_distribuidores = (req, res, next) => {
+
+   const querySQL_distribuidores = 'SELECT id_distribuidores AS id, distribuidores FROM distribuidores ORDER BY distribuidores ASC;';
+
+   query(querySQL_distribuidores)
+      .then((data) => {
+         res.send(data);
+      }).catch((err) => {
+         next(err);
+      });
+}
+
+exports.get_regiones = (req, res, next) => {
+
+   const querySQL = 'SELECT id_regiones AS id, regiones FROM regiones;';
+
+   query(querySQL)
+      .then((data) => {
+         res.send(data)
+      }).catch((err) => {
+         next(err);
+      });
+
+}
+
+exports.get_zonas = (req, res, next) => {
+
+   const { id } = req.query;
+
+   const querySQL = 'SELECT id_zonas AS id, zonas FROM zonas WHERE id_regiones = ? ORDER BY zonas ASC;';
+
+   query(querySQL, id)
+      .then((data) => {
+         res.send(data)
+      }).catch((err) => {
+         next(err);
+      });
+}
+
+exports.get_pv = (req, res, next) => {
+
+   const { id } = req.query;
+
+   const querySQL = 'SELECT id_puntos_venta AS id, puntos_venta AS pv FROM puntos_venta WHERE id_zonas = ?;';
+
+   query(querySQL, id)
+      .then((data) => {
+         res.send(data)
+      }).catch((err) => {
+         next(err);
+      });
 }
 
 exports.get_user_productos = async (req, res, next) => {
@@ -88,40 +142,48 @@ exports.get_data_signup = async (req, res, next) => {
    next();
 }
 
-exports.post_registrase = async (req, res, next) => {
+exports.post_registrase = (req, res, next) => {
 
    const {
-      correo,
       distribuidor,
-      region,
+      pv,
+      occ,
+      correo,
       celular,
-      codigo
+      codigo,
    } = req.body;
 
-   const querySQL_Select = 'SELECT count(id_usuarios) AS cantidad FROM usuarios WHERE correo_usuarios=?;'
+   const querySQL_Select = 'SELECT count(id_usuarios) AS cantidad FROM users WHERE correo = ?;'
 
-   query(querySQL_Select, correo).then((data) => {
+   query(querySQL_Select, correo)
+      .then((data) => {
 
-      if (data[0].cantidad === 0) {
+         if (data[0].cantidad === 0) {
 
-         const querySQL_Insert = 'INSERT INTO usuarios (correo_usuarios, distribuidor_usuarios, region_usuarios, celular_usuarios, codigo_usuarios) VALUES (?, ?, ?, ?, ?);';
-         const data_QuerySQL_Insert = [correo, distribuidor, region, celular, codigo];
+            const querySQL_Insert = 'INSERT INTO users (distribuidor, punto_venta, occ, correo, celular, codigo) VALUES (?, ?, ?, ?, ?, ?);';
+            const data_QuerySQL_Insert = [
+               distribuidor,
+               pv,
+               occ,
+               correo,
+               celular,
+               codigo,
+            ];
 
-         query(querySQL_Insert, data_QuerySQL_Insert).then(() => {
-            res.send('Registro añadido correctamente');
-         }).catch((err) => {
-            console.log(err);
-            next(err);
-         });
+            query(querySQL_Insert, data_QuerySQL_Insert)
+               .then(() => {
+                  res.send('Registro añadido correctamente');
+               }).catch((err) => {
+                  next(err);
+               });
 
-      } else {
-         res.status(400).send(`El correo electrónico '${correo}', ya se encuentra registrado en la base de datos.`)
-      }
+         } else {
+            res.status(400).send(`El correo electrónico '${correo}', ya se encuentra registrado en la base de datos.`)
+         }
 
-   }).catch((err) => {
-      console.log(err);
-      next(err);
-   });
+      }).catch((err) => {
+         next(err);
+      });
 
 }
 
