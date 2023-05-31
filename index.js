@@ -7,7 +7,7 @@ const { errorHandling } = require('./src/middelwares/errorHandling');
 const routes = require('./src/routes/routes.js');
 
 const app = express();
-const PORT = process.env.PORT || 2142;
+const PORT = process.env.PORT || 2143;
 
 app.use(cors());
 
